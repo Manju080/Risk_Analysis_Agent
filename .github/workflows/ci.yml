@@ -1,0 +1,36 @@
+name: CI
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Run unit tests
+        run: pytest tests/test_risk_agent.py -v
+
+      - name: Check imports
+        run: |
+          python -c "from api.schemas import PortfolioRequest, RiskReport; print('schemas ok')"
+          python -c "from agents.risk_agent import calculate_var, calculate_sharpe, calculate_beta; print('risk agent ok')"
+          python -c "from core.settings import get_settings; print('settings ok')"
+
+      - name: Lint
+        run: |
+          pip install flake8
+          flake8 agents/ api/ core/ --max-line-length=120 --ignore=E501,W503

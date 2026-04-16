@@ -1,0 +1,46 @@
+# ── Core ──────────────────────────────────────────
+fastapi>=0.115.0
+uvicorn>=0.30.6
+python-dotenv>=1.0.1
+pydantic>=2.8.2
+pydantic-settings>=2.10.1
+
+# ── LangChain ─────────────────────────────────────
+langchain>=0.3.1
+langchain-core>=0.3.6
+langchain-community>=0.3.1
+langchain-google-genai>=2.0.0
+langchain-anthropic>=0.2.1
+langchain-ollama>=0.2.0
+langchain-huggingface
+# ── Vector DB ─────────────────────────────────────
+pinecone-client>=5.0.1
+pinecone>=5.0.1
+sentence-transformers>=3.1.1
+
+# ── Finance / Data ────────────────────────────────
+yfinance>=0.2.44
+pandas>=2.2.2
+numpy>=1.26.4
+scipy>=1.14.1
+
+# ── News ingestion ────────────────────────────────
+newsapi-python>=0.2.7
+apscheduler>=3.10.4
+
+# # ── Evaluation ────────────────────────────────────
+# ragas>=0.1.21
+
+# # ── MLflow tracking ───────────────────────────────
+# mlflow>=2.16.2
+
+# ── UI ────────────────────────────────────────────
+streamlit>=1.38.0
+plotly>=5.24.1
+
+# ── PDF export ────────────────────────────────────
+fpdf2>=2.8.1
+
+# ── Testing ───────────────────────────────────────
+pytest>=8.3.3
+pytest-asyncio>=0.24.0
