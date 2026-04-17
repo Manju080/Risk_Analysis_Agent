@@ -30,11 +30,12 @@ def get_llm(temperature: float = 0):
 
 def get_embedder():
     """
-    Always uses local BAAI/bge-small-en-v1.5 — free, no API key, good for finance text.
+    Uses Google Generative AI embeddings — API-based, no local model download.
+    Avoids PyTorch/HuggingFace RAM overhead that crashes Render free tier.
     """
-    from langchain_community.embeddings import HuggingFaceEmbeddings
-    return HuggingFaceEmbeddings(
-        model_name="BAAI/bge-small-en-v1.5",
-        model_kwargs={"device": "cpu"},
-        encode_kwargs={"normalize_embeddings": True},
+    from langchain_google_genai import GoogleGenerativeAIEmbeddings
+    settings = get_settings()
+    return GoogleGenerativeAIEmbeddings(
+        model="models/text-embedding-004",
+        google_api_key=settings.google_api_key,
     )
