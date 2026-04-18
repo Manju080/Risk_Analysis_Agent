@@ -28,13 +28,19 @@ def get_llm(temperature: float = 0):
     else:
         raise ValueError(f"Unknown LLM_PROVIDER: {settings.llm_provider}")
 
+_embedder = None
+
 def get_embedder():
     """
     Always uses local BAAI/bge-small-en-v1.5 — free, no API key, good for finance text.
+    Cached as a module-level singleton so the model is only downloaded once per process.
     """
-    from langchain_community.embeddings import HuggingFaceEmbeddings
-    return HuggingFaceEmbeddings(
-        model_name="BAAI/bge-small-en-v1.5",
-        model_kwargs={"device": "cpu"},
-        encode_kwargs={"normalize_embeddings": True},
-    )
+    global _embedder
+    if _embedder is None:
+        from langchain_community.embeddings import HuggingFaceEmbeddings
+        _embedder = HuggingFaceEmbeddings(
+            model_name="BAAI/bge-small-en-v1.5",
+            model_kwargs={"device": "cpu"},
+            encode_kwargs={"normalize_embeddings": True},
+        )
+    return _embedder

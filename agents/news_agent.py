@@ -10,7 +10,6 @@ from core.settings import get_settings
 from core.llm_factory import get_embedder,get_llm
 
 logger = logging.getLogger(__name__)
-settings = get_settings()
 
 NEWS_SUMMARY_PROMPT = PromptTemplate.from_template("""
 You are a financial analyst. Below are recent news excerpts about {ticker} stock on the NSE.
@@ -30,6 +29,7 @@ def retriver_news(ticker: str, top_k: int =5) -> list[dict]:
     Semantic search in Pinecone for a ticker's news namespace.
     Returns list of metadata dicts with chunk + source + published_at.
     """
+    settings = get_settings()
     pc = Pinecone(api_key = settings.pinecone_api_key)
     index    = pc.Index(settings.pinecone_index)
     embedder = get_embedder()
