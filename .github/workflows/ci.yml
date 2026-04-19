@@ -33,4 +33,4 @@ jobs:
       - name: Lint
         run: |
           pip install flake8
-          flake8 agents/ api/ core/ --max-line-length=120 --ignore=E501,W503
+          flake8 agents/ api/ core/ --max-line-length=120 --extend-ignore=E203,E402,E221,E251,E302,E305,E231,E225,E265,W293

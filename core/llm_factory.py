@@ -5,15 +5,16 @@ Swap provider by changing LLM_PROVIDER in .env — zero code changes elsewhere.
 
 from core.settings import get_settings
 
+
 def get_llm(temperature: float = 0):
     settings = get_settings()
 
     if settings.llm_provider == "gemini":
         from langchain_google_genai import ChatGoogleGenerativeAI
         return ChatGoogleGenerativeAI(
-            model ="gemini-2.5-flash",
+            model="gemini-2.5-flash",
             temperature=temperature,
-            google_api_key  = settings.google_api_key,
+            google_api_key=settings.google_api_key,
         )
     elif settings.llm_provider == "haiku":
         from langchain_anthropic import ChatAnthropic
@@ -28,7 +29,9 @@ def get_llm(temperature: float = 0):
     else:
         raise ValueError(f"Unknown LLM_PROVIDER: {settings.llm_provider}")
 
+
 _embedder = None
+
 
 def get_embedder():
     """

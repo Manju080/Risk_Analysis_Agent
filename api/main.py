@@ -1,3 +1,9 @@
+import uuid
+from agents.orchestrator import run_analysis
+from api.schemas import PortfolioRequest, RiskReport
+from fastapi.responses import JSONResponse
+from fastapi.middleware.cors import CORSMiddleware
+from fastapi import FastAPI, HTTPException
 import sys
 import os
 import logging
@@ -9,12 +15,6 @@ os.chdir(_root)
 if _root not in sys.path:
     sys.path.insert(0, _root)
 
-from fastapi import FastAPI, HTTPException
-from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import JSONResponse
-from api.schemas import PortfolioRequest, RiskReport
-from agents.orchestrator import run_analysis
-import uuid
 
 logging.basicConfig(
     level=logging.INFO,

@@ -10,7 +10,8 @@ from agents.news_agent import summarise_news
 from agents.memory_agent import add_interaction, get_recent_context
 from core.llm_factory import get_llm
 from langchain_core.output_parsers import StrOutputParser
-import json, re
+import json
+import re
 
 logger = logging.getLogger(__name__)
 
@@ -45,19 +46,27 @@ Return ONLY valid JSON — no markdown, no explanation:
 
 def _classify_risk(var: float, sharpe: float, beta: float) -> RiskLevel:
     score = 0
-    if var > 3.0:      score += 2
-    elif var > 1.5:    score += 1
-    if sharpe < 0:     score += 2
-    elif sharpe < 0.5: score += 1
-    if beta > 1.5:     score += 2
-    elif beta > 1.0:   score += 1
-    if score >= 4: return RiskLevel.HIGH
-    if score >= 2: return RiskLevel.MEDIUM
+    if var > 3.0:
+        score += 2
+    elif var > 1.5:
+        score += 1
+    if sharpe < 0:
+        score += 2
+    elif sharpe < 0.5:
+        score += 1
+    if beta > 1.5:
+        score += 2
+    elif beta > 1.0:
+        score += 1
+    if score >= 4:
+        return RiskLevel.HIGH
+    if score >= 2:
+        return RiskLevel.MEDIUM
     return RiskLevel.LOW
 
 
 def run_analysis(request, session_id: str = "default") -> RiskReport:
-    tickers      = [h.ticker for h in request.holdings]
+    tickers = [h.ticker for h in request.holdings]
     holdings_raw = [h.model_dump() for h in request.holdings]
 
     # Step 1: Prices
@@ -107,7 +116,7 @@ def run_analysis(request, session_id: str = "default") -> RiskReport:
 
     # Step 5: LLM synthesis
     logger.info("Step 5 — LLM synthesis")
-    llm   = get_llm(temperature=0)
+    llm = get_llm(temperature=0)
     str_chain = SYNTHESIS_PROMPT | llm | StrOutputParser()
     try:
         raw = str_chain.invoke({
@@ -130,48 +139,48 @@ def run_analysis(request, session_id: str = "default") -> RiskReport:
     total_var, total_sharpe = 0.0, 0.0
 
     for h in price_data["holdings"]:
-        t   = h["ticker"]
-        rd  = risk_data.get(t, {})
+        t = h["ticker"]
+        rd = risk_data.get(t, {})
         var = rd.get("var_1d_95", 0)
-        sh  = rd.get("sharpe_ratio", 0)
-        bt  = rd.get("beta", 1.0)
-        w   = h["weight_pct"] / 100
+        sh = rd.get("sharpe_ratio", 0)
+        bt = rd.get("beta", 1.0)
+        w = h["weight_pct"] / 100
 
-        total_var    += var * w
-        total_sharpe += sh  * w
+        total_var += var * w
+        total_sharpe += sh * w
 
-        llm_cls  = llm_out.get("risk_classifications", {}).get(t)
+        llm_cls = llm_out.get("risk_classifications", {}).get(t)
         risk_lvl = (RiskLevel(llm_cls)
-                    if llm_cls in ["low","medium","high"]
+                    if llm_cls in ["low", "medium", "high"]
                     else _classify_risk(var, sh, bt))
 
         holding_risks.append(HoldingRisk(
-            ticker        = t,
-            current_price = h["current_price"],
-            weight_pct    = h["weight_pct"],
-            var_1d_95     = var,
-            sharpe_ratio  = sh,
-            beta          = bt,
-            risk_level    = risk_lvl,
-            news_summary  = news_data.get(t, {}).get("summary", ""),
+            ticker=t,
+            current_price=h["current_price"],
+            weight_pct=h["weight_pct"],
+            var_1d_95=var,
+            sharpe_ratio=sh,
+            beta=bt,
+            risk_level=risk_lvl,
+            news_summary=news_data.get(t, {}).get("summary", ""),
         ))
 
     report = RiskReport(
-        portfolio_name      = request.portfolio_name,
-        total_value         = price_data["total_value"],
-        portfolio_var_1d_95 = round(total_var, 4),
-        portfolio_sharpe    = round(total_sharpe, 4),
-        overall_risk_level  = _classify_risk(total_var, total_sharpe, 1.0),
-        holdings            = holding_risks,
-        alerts              = llm_out.get("alerts", []),
-        recommendation      = llm_out.get("recommendation", ""),
-        data_timestamp      = datetime.now().strftime("%Y-%m-%d %H:%M IST"),
+        portfolio_name=request.portfolio_name,
+        total_value=price_data["total_value"],
+        portfolio_var_1d_95=round(total_var, 4),
+        portfolio_sharpe=round(total_sharpe, 4),
+        overall_risk_level=_classify_risk(total_var, total_sharpe, 1.0),
+        holdings=holding_risks,
+        alerts=llm_out.get("alerts", []),
+        recommendation=llm_out.get("recommendation", ""),
+        data_timestamp=datetime.now().strftime("%Y-%m-%d %H:%M IST"),
     )
 
     add_interaction(
         session_id,
-        user_input  = f"Analyse portfolio: {tickers}",
-        ai_response = report.recommendation,
+        user_input=f"Analyse portfolio: {tickers}",
+        ai_response=report.recommendation,
     )
 
     logger.info(f"Analysis complete — risk: {report.overall_risk_level}")
