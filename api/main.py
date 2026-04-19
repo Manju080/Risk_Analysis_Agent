@@ -38,22 +38,6 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-resp = requests.post(
-    f"{API_URL}/analyze",
-    json={"holdings": holdings, "portfolio_name": portfolio_name},
-    headers={"Content-Type": "application/json"},
-    timeout=180,
-)
-
-import time
-with st.spinner("Waking up API server... (first request may take 30-60s)"):
-    for attempt in range(5):
-        try:
-            wake = requests.get(f"{API_URL}/health", timeout=30)
-            if wake.status_code == 200:
-                break
-        except:
-            time.sleep(5)
 
 @app.get("/")
 def root():
@@ -68,6 +52,11 @@ def root():
 @app.get("/health")
 def health():
     return {"status": "ok", "service": "portfolio-risk-advisor"}
+
+
+@app.get("/ping")
+def ping():
+    return {"pong": True}
 
 
 @app.post("/analyze", response_model=RiskReport)
@@ -90,9 +79,6 @@ def analyze_portfolio(request: PortfolioRequest):
         logger.error(f"Analysis failed: {e}", exc_info=True)
         raise HTTPException(status_code=500, detail=str(e))
 
-@app.get("/ping")
-def ping():
-    return {"pong": True}
 
 @app.exception_handler(Exception)
 async def global_exception_handler(request, exc):
