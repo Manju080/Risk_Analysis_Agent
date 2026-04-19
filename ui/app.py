@@ -130,12 +130,12 @@ else:
                 except:
                     time.sleep(5)
 
-        resp = requests.post(
-            f"{API_URL}/analyze",
-            json={"holdings": holdings, "portfolio_name": portfolio_name},
-            headers={"Content-Type": "application/json"},
-            timeout=180,
-        )
+            resp = requests.post(
+                f"{API_URL}/analyze",
+                json={"holdings": holdings, "portfolio_name": portfolio_name},
+                headers={"Content-Type": "application/json"},
+                timeout=180,
+            )
         prog.progress(80, text="Synthesising AI report...")
         resp.raise_for_status()
         data = resp.json()
