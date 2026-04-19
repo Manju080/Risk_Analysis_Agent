@@ -4,6 +4,7 @@ import pandas as pd
 import plotly.graph_objects as go
 from datetime import datetime
 import os
+import time
 
 API_URL = os.getenv("API_URL", "http://localhost:8000")
 
@@ -119,6 +120,16 @@ else:
     prog = st.progress(0, text="Fetching live prices...")
     try:
         prog.progress(30, text="Calculating VaR · Sharpe · Beta...")
+
+        with st.spinner("Waking up API server... (first request may take 30-60s)"):
+            for attempt in range(5):
+                try:
+                    wake = requests.get(f"{API_URL}/health", timeout=30)
+                    if wake.status_code == 200:
+                        break
+                except:
+                    time.sleep(5)
+
         resp = requests.post(
             f"{API_URL}/analyze",
             json={"holdings": holdings, "portfolio_name": portfolio_name},
