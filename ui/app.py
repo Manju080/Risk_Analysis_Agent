@@ -117,26 +117,27 @@ elif not holdings:
     st.warning("Add at least one holding in the sidebar.")
 
 else:
-    prog = st.progress(0, text="Waking up API server...")
+    prog = st.progress(0, text="Fetching live prices...")
     try:
-        # Step 1 — ensure API is responsive before firing the heavy request
-        api_ready = False
-        with st.spinner("Waking up API server... (first request may take 30-60s)"):
-            for attempt in range(5):
-                try:
-                    wake = requests.get(f"{API_URL}/health", timeout=30)
-                    if wake.status_code == 200:
-                        api_ready = True
-                        break
-                except requests.exceptions.RequestException:
-                    time.sleep(5)
+        # Wake up Render before main call
+        import time
+        wake_placeholder = st.empty()
+        wake_placeholder.info("Connecting to API server...")
+        for attempt in range(6):
+            try:
+                wake = requests.get(f"{API_URL}/ping", timeout=15)
+                if wake.status_code == 200:
+                    wake_placeholder.empty()
+                    break
+            except:
+                wake_placeholder.info(f"Waking up server... attempt {attempt+1}/6")
+                time.sleep(8)
+        else:
+            wake_placeholder.warning("Server slow to respond — trying analysis anyway...")
+            time.sleep(2)
+            wake_placeholder.empty()
 
-        if not api_ready:
-            st.error("API server did not respond after 5 attempts. Please try again in a moment.")
-            st.stop()
-
-        # Step 2 — run the analysis
-        prog.progress(30, text="Fetching live prices · Calculating VaR · Sharpe · Beta...")
+        prog.progress(30, text="Calculating VaR · Sharpe · Beta...")
         resp = requests.post(
             f"{API_URL}/analyze",
             json={"holdings": holdings, "portfolio_name": portfolio_name},
