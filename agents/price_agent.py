@@ -5,13 +5,13 @@ from core.settings import get_settings
 import logging
 
 logger = logging.getLogger(__name__)
-settings = get_settings()
 
 def get_live_prices(tickers: list[str])->dict:
     """
     Returns {ticker: current_price} for a list of NSE tickers.    
     """
 
+    settings = get_settings()
     suffix = settings.default_exchange_suffix
     full_tickers = [f"{t}{suffix}" if "." not in t else t for t in tickers]
 

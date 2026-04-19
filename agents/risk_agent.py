@@ -14,7 +14,6 @@ import logging
 from core.settings import get_settings
 
 logger = logging.getLogger(__name__)
-settings = get_settings()
 
 NIFTY_TICKER = "^NSEI"
 
@@ -23,6 +22,7 @@ def _fetch_returns(ticker: str, period: str = "1y") -> pd.Series:
     Fetch adjusted close prices and compute daily log returns.
     NSE tickers need '.NS' suffix for yfinance.
     """
+    settings = get_settings()
     suffix = settings.default_exchange_suffix
     full_ticker = ticker if ("." in ticker or ticker.startswith("^")) else f"{ticker}{suffix}"
     
@@ -58,7 +58,7 @@ def calculate_sharpe(returns: pd.Series, risk_free_rate: float = None) -> float:
     risk_free_rate: annual rate (e.g. 0.065 for 6.5%).
     """
     if risk_free_rate is None:
-        risk_free_rate = settings.risk_free_rate
+        risk_free_rate = get_settings().risk_free_rate
     
     daily_rf = risk_free_rate / 252
     excess = returns - daily_rf
@@ -95,13 +95,14 @@ def analyze_ticker(ticker: str)-> dict:
     stock_returns  = _fetch_returns(ticker)
     market_returns = _fetch_returns(NIFTY_TICKER)
     
-    var    = calculate_var(stock_returns, settings.var_confidence)
+    _s     = get_settings()
+    var    = calculate_var(stock_returns, _s.var_confidence)
     sharpe = calculate_sharpe(stock_returns)
     beta   = calculate_beta(stock_returns, market_returns)
 
     #current price
 
-    suffix = settings.default_exchange_suffix
+    suffix = get_settings().default_exchange_suffix
     full_ticker = f"{ticker}{suffix}" if "." not in ticker else ticker
     info = yf.Ticker(full_ticker).fast_info
     current_price = round(float(info.last_price),2)
