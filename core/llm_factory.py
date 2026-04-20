@@ -35,15 +35,15 @@ _embedder = None
 
 def get_embedder():
     """
-    Always uses local BAAI/bge-small-en-v1.5 — free, no API key, good for finance text.
-    Cached as a module-level singleton so the model is only downloaded once per process.
+    Uses Google's text-embedding-004 model via API to save server RAM.
+    Render's free tier (512MB RAM) cannot hold PyTorch/sentence-transformers.
     """
     global _embedder
     if _embedder is None:
-        from langchain_community.embeddings import HuggingFaceEmbeddings
-        _embedder = HuggingFaceEmbeddings(
-            model_name="BAAI/bge-small-en-v1.5",
-            model_kwargs={"device": "cpu"},
-            encode_kwargs={"normalize_embeddings": True},
+        from langchain_google_genai import GoogleGenerativeAIEmbeddings
+        settings = get_settings()
+        _embedder = GoogleGenerativeAIEmbeddings(
+            model="models/text-embedding-004",
+            google_api_key=settings.google_api_key,
         )
     return _embedder
