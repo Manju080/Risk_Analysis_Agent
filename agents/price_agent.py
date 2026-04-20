@@ -46,10 +46,16 @@ def get_portfolio_value(holdings: list[dict]) -> dict:
     total_value = 0.0
 
     for h in holdings:
-        tickers = h["ticker"]
+        loc_ticker = h["ticker"]
         qty = h["quantity"]
         avg_buy = h["avg_buy_price"]
-        curr_px = prices.get(tickers) or avg_buy
+        
+        pz = prices.get(loc_ticker)
+        # Handle None or pandas/numpy NaNs correctly
+        if pz is None or pd.isna(pz):
+            curr_px = avg_buy
+        else:
+            curr_px = pz
 
         curr_val = round(curr_px * qty, 2)
         cost_val = round(avg_buy * qty, 2)
