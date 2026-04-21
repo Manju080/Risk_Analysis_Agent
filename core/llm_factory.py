@@ -43,7 +43,7 @@ def get_embedder():
         from langchain_google_genai import GoogleGenerativeAIEmbeddings
         settings = get_settings()
         _embedder = GoogleGenerativeAIEmbeddings(
-            model="models/text-embedding-004",
+            model="models/gemini-embedding-001",
             google_api_key=settings.google_api_key,
         )
     return _embedder
