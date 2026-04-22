@@ -12,7 +12,7 @@ def get_llm(temperature: float = 0):
     if settings.llm_provider == "gemini":
         from langchain_google_genai import ChatGoogleGenerativeAI
         return ChatGoogleGenerativeAI(
-            model="gemini-2.0-flash",
+            model="gemini-2.5-flash",
             temperature=temperature,
             google_api_key=settings.google_api_key,
         )
@@ -43,7 +43,7 @@ def get_embedder():
         from langchain_google_genai import GoogleGenerativeAIEmbeddings
         settings = get_settings()
         _embedder = GoogleGenerativeAIEmbeddings(
-            model="models/gemini-embedding-001",
+            model="models/text-embedding-004",
             google_api_key=settings.google_api_key,
         )
     return _embedder
